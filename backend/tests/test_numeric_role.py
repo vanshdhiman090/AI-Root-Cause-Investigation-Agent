@@ -65,3 +65,18 @@ def test_a_named_calendar_column_with_too_many_distinct_values_is_not_cyclical()
     frame = pd.DataFrame({"Month": [i % 20 for i in range(rows)]})
     role = classify_numeric_role(frame["Month"], "Month", len(frame))
     assert role == "quantity"
+
+
+def test_a_named_business_amount_with_few_distinct_values_is_still_a_quantity():
+    # The public demo fixture has a "revenue" column with only 11 distinct
+    # prices across 320 rows. It must stay selectable as a KPI.
+    rows = 320
+    values = [10.0, 20.0, 50.0, 60.0, 80.0, 90.0, 100.0, 110.0, 120.0, 150.0, 170.0]
+    frame = pd.DataFrame({"revenue": [values[i % len(values)] for i in range(rows)]})
+    assert classify_numeric_role(frame["revenue"], "revenue", len(frame)) == "quantity"
+
+
+def test_a_named_ordinal_price_tier_with_few_distinct_values_stays_discrete_scale():
+    rows = 200
+    frame = pd.DataFrame({"price_tier": [i % 4 + 1 for i in range(rows)]})
+    assert classify_numeric_role(frame["price_tier"], "price_tier", len(frame)) == "discrete_scale"

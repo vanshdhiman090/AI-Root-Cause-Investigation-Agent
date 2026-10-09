@@ -38,6 +38,25 @@ CYCLICAL_NAME_BOUNDS: tuple[tuple[tuple[str, ...], int], ...] = (
 # or rate is a known, separate gap this milestone does not address.
 DISCRETE_SCALE_MAX_UNIQUE = 15
 
+# A column whose name states a summable business amount (revenue, sales,
+# cost...) is a quantity even when it only takes a few distinct values, such
+# as a price list or a small demo dataset. Names that signal an ordinal scale
+# or a flag (rating, tier, rank, score, level, flag) are excluded so
+# "price_tier" still falls through to discrete_scale.
+QUANTITY_NAME_TOKENS = (
+    "revenue",
+    "sales",
+    "amount",
+    "profit",
+    "cost",
+    "spend",
+    "price",
+    "income",
+    "turnover",
+    "bill",
+)
+NON_QUANTITY_NAME_TOKENS = ("rating", "tier", "rank", "score", "level", "flag", "grade")
+
 
 def classify_numeric_role(series: pd.Series, name: str, row_count: int) -> str | None:
     """Classify a numeric column's business role for KPI/dimension eligibility.
@@ -64,6 +83,10 @@ def classify_numeric_role(series: pd.Series, name: str, row_count: int) -> str |
             return "cyclical"
 
     if unique_count <= DISCRETE_SCALE_MAX_UNIQUE:
+        if any(token in lowered for token in QUANTITY_NAME_TOKENS) and not any(
+            token in lowered for token in NON_QUANTITY_NAME_TOKENS
+        ):
+            return "quantity"
         return "discrete_scale"
 
     return "quantity"
