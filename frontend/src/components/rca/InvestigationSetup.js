@@ -1,4 +1,5 @@
 import { titleize } from "@/lib/rcaPresentation";
+import WakeNotice from "@/components/rca/WakeNotice";
 
 function FieldError({ id, errors }) {
   const message = errors?.[id];
@@ -188,6 +189,7 @@ function RecruiterDemoPanel({ onLoadDemo, loading, errors }) {
           {loading ? "Loading validated demo…" : "Try validated demo"}
         </button>
       </div>
+      <WakeNotice active={loading} />
       <FieldError id="dataset" errors={errors} />
     </section>
   );
